@@ -26,7 +26,7 @@
     restart_policy: always
     state: started
     volumes:
-      - /etc/prometheus/alertmanager.yml:/etc/prometheus/alertmanager.yml:ro
+      - "{{ prometheus_config_dir }}/alertmanager.yml:/etc/prometheus/alertmanager.yml:ro"
       - alertmanager-data:/alertmanager
   register: _alertmanager_container
 
@@ -47,7 +47,7 @@
     restart_policy: always
     state: started
     volumes:
-      - /etc/prometheus/blackbox-exporter.yml:/etc/prometheus/blackbox-exporter.yml:ro
+      - "{{ prometheus_config_dir }}/blackbox-exporter.yml:/etc/prometheus/blackbox-exporter.yml:ro"
   register: _blackboxexporter_container
 
 - name: prometheus | docker prometheus
@@ -77,9 +77,9 @@
     volumes:
       # We could mount /etc/prometheus instead but the Docker image contains
       # additional (optional) files
-      - /etc/prometheus/rules/:/etc/prometheus/rules/:ro
-      - /etc/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - /etc/prometheus/targets/:/etc/prometheus/targets/:ro
+      - "{{ prometheus_config_dir }}/rules/:/etc/prometheus/rules/:ro"
+      - "{{ prometheus_config_dir }}/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+      - "{{ prometheus_config_dir }}/targets/:/etc/prometheus/targets/:ro"
       - "{{ prometheus_docker_data_volume }}:/prometheus"
   register: _prometheus_container
 
@@ -90,9 +90,9 @@
   stat:
     path: "{{ item }}"
   with_items:
-    - /etc/prometheus/alertmanager.yml
-    - /etc/prometheus/blackbox-exporter.yml
-    - /etc/prometheus/prometheus.yml
+    - "{{ prometheus_config_dir }}/alertmanager.yml"
+    - "{{ prometheus_config_dir }}/blackbox-exporter.yml"
+    - "{{ prometheus_config_dir }}/prometheus.yml"
   register: prometheus_docker_file_mounts
 
 - name: prometheus | assert docker host file mounts
@@ -127,3 +127,4 @@
            _alertmanager_container.ansible_facts.docker_container)
         ).NetworkSettings.IPAddress
       }}
+  when: 0  # need to fix
