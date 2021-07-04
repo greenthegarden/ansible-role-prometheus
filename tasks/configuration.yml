@@ -9,7 +9,7 @@
 
 - name: Define configuration directory
   ansible.builtin.set_fact:
-    prometheus_config_dir: "{{ ansible_user_registered }}/prometheus"
+    prometheus_config_dir: "{{ ansible_user_registered.home }}/prometheus"
 
 - name: prometheus | create directories
   file:
